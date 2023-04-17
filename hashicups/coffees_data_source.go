@@ -28,6 +28,7 @@ type coffeesDataSource struct {
 // coffeesDataSourceModel maps the data source schema data.
 type coffeesDataSourceModel struct {
 	Coffees []coffeesModel `tfsdk:"coffees"`
+	ID      types.String   `tfsdk:"id"`
 }
 
 // coffeesModel maps coffees schema data.
@@ -55,6 +56,9 @@ func (d *coffeesDataSource) Metadata(_ context.Context, req datasource.MetadataR
 func (d *coffeesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed: true,
+			},
 			"coffees": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
@@ -126,6 +130,8 @@ func (d *coffeesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 		state.Coffees = append(state.Coffees, coffeeState)
 	}
+
+	state.ID = types.StringValue("placeholder")
 
 	// Set state
 	diags := resp.State.Set(ctx, &state)
