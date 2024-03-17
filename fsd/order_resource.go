@@ -1,11 +1,11 @@
-package hashicups
+package fsd
 
 import (
 	"context"
 	"strconv"
 	"time"
 
-	"github.com/hashicorp-demoapp/hashicups-client-go"
+	typs "github.com/gofsd/fsd-types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -51,7 +51,7 @@ func NewOrderResource() resource.Resource {
 
 // orderResource is the resource implementation.
 type orderResource struct {
-	client *hashicups.Client
+	client *typs.Client
 }
 
 // Configure adds the provider configured client to the resource.
@@ -60,7 +60,7 @@ func (r *orderResource) Configure(_ context.Context, req resource.ConfigureReque
 		return
 	}
 
-	r.client = req.ProviderData.(*hashicups.Client)
+	r.client = req.ProviderData.(*typs.Client)
 }
 
 // Metadata returns the resource type name.
@@ -141,10 +141,10 @@ func (r *orderResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	// Generate API request body from plan
-	var items []hashicups.OrderItem
+	var items []typs.OrderItem
 	for _, item := range plan.Items {
-		items = append(items, hashicups.OrderItem{
-			Coffee: hashicups.Coffee{
+		items = append(items, typs.OrderItem{
+			Coffee: typs.Coffee{
 				ID: int(item.Coffee.ID.ValueInt64()),
 			},
 			Quantity: int(item.Quantity.ValueInt64()),
@@ -196,12 +196,12 @@ func (r *orderResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	// Get refreshed order value from HashiCups
+	// Get refreshed order value from fsd
 	order, err := r.client.GetOrder(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading HashiCups Order",
-			"Could not read HashiCups order ID "+state.ID.ValueString()+": "+err.Error(),
+			"Error Reading fsd Order",
+			"Could not read fsd order ID "+state.ID.ValueString()+": "+err.Error(),
 		)
 		return
 	}
@@ -240,10 +240,10 @@ func (r *orderResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	// Generate API request body from plan
-	var hashicupsItems []hashicups.OrderItem
+	var fsdItems []typs.OrderItem
 	for _, item := range plan.Items {
-		hashicupsItems = append(hashicupsItems, hashicups.OrderItem{
-			Coffee: hashicups.Coffee{
+		fsdItems = append(fsdItems, typs.OrderItem{
+			Coffee: typs.Coffee{
 				ID: int(item.Coffee.ID.ValueInt64()),
 			},
 			Quantity: int(item.Quantity.ValueInt64()),
@@ -251,10 +251,10 @@ func (r *orderResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	// Update existing order
-	_, err := r.client.UpdateOrder(plan.ID.ValueString(), hashicupsItems)
+	_, err := r.client.UpdateOrder(plan.ID.ValueString(), fsdItems)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Updating HashiCups Order",
+			"Error Updating fsd Order",
 			"Could not update order, unexpected error: "+err.Error(),
 		)
 		return
@@ -265,8 +265,8 @@ func (r *orderResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	order, err := r.client.GetOrder(plan.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Reading HashiCups Order",
-			"Could not read HashiCups order ID "+plan.ID.ValueString()+": "+err.Error(),
+			"Error Reading fsd Order",
+			"Could not read fsd order ID "+plan.ID.ValueString()+": "+err.Error(),
 		)
 		return
 	}
@@ -308,7 +308,7 @@ func (r *orderResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	err := r.client.DeleteOrder(state.ID.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting HashiCups Order",
+			"Error Deleting fsd Order",
 			"Could not delete order, unexpected error: "+err.Error(),
 		)
 		return

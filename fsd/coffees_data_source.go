@@ -1,9 +1,9 @@
-package hashicups
+package fsd
 
 import (
 	"context"
 
-	"github.com/hashicorp-demoapp/hashicups-client-go"
+	typs "github.com/gofsd/fsd-types"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -22,7 +22,7 @@ func NewCoffeesDataSource() datasource.DataSource {
 
 // coffeesDataSource is the data source implementation.
 type coffeesDataSource struct {
-	client *hashicups.Client
+	client *typs.Client
 }
 
 // coffeesDataSourceModel maps the data source schema data.
@@ -116,7 +116,7 @@ func (d *coffeesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	coffees, err := d.client.GetCoffees()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Unable to Read HashiCups Coffees",
+			"Unable to Read fsd Coffees",
 			err.Error(),
 		)
 		return
@@ -158,5 +158,5 @@ func (d *coffeesDataSource) Configure(_ context.Context, req datasource.Configur
 		return
 	}
 
-	d.client = req.ProviderData.(*hashicups.Client)
+	d.client = req.ProviderData.(*typs.Client)
 }
